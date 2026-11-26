@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tirage Gala ACSON</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* Plan : charte de l'affiche ACSON (blanc, vert-bleu, orange), bandeau événement, liste à gauche, scène et gagnants à droite. */
+:root {
+  --bg: #f4f8f8;
+  --panel: #ffffff;
+  --line: #d3e2e3;
+  --text: #12363a;
+  --muted: #587479;
+  --teal: #0f6e73;
+  --gold: #d9500f;
+  --gold-ink: #ffffff;
+  --field: #f1f7f7;
+  --display: "Poppins", "Segoe UI", system-ui, sans-serif;
+  --body: "DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--body);
+  line-height: 1.5;
+  min-height: 100%;
+}
+.wrap { max-width: 1080px; margin: 0 auto; padding: 28px 20px 48px; }
+header { display: flex; flex-direction: column; gap: 4px; margin-bottom: 24px; }
+.kicker { color: var(--gold); border: 1.5px solid var(--gold); border-radius: 999px; padding: 4px 12px; font-size: 13px; letter-spacing: .14em; text-transform: uppercase; font-weight: 500; }
+h1 { font-family: var(--display); font-weight: 800; color: var(--teal); font-size: clamp(30px, 5vw, 46px); margin: 0; line-height: 1.1; text-wrap: balance; }
+.sub { color: var(--muted); margin: 0; }
+.grid { display: grid; grid-template-columns: minmax(0, 340px) minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 800px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 12px; }
+h2 { font-size: 15px; margin: 0; font-weight: 700; }
+label.field { font-size: 14px; color: var(--muted); }
+textarea {
+  width: 100%; min-height: 260px; resize: vertical;
+  background: var(--field); color: var(--text); border: 1px solid var(--line); border-radius: 8px;
+  padding: 10px 12px; font: 15px/1.6 var(--body);
+}
+textarea:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.opt { display: flex; align-items: center; gap: 10px; font-size: 14px; }
+.opt input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--gold); }
+.opt input[type=number] { width: 64px; background: var(--field); color: var(--text); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; font: inherit; }
+.count { font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.count b { color: var(--text); }
+.stage-col { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+.stage {
+  background: linear-gradient(180deg, #ffffff, #e8f3f3);
+  border: 2px solid var(--teal); border-radius: 14px;
+  padding: 28px 20px 24px; text-align: center;
+  display: flex; flex-direction: column; align-items: center; gap: 18px;
+  box-shadow: 0 6px 24px rgba(15,110,115,.12);
+}
+.prize { color: var(--gold); letter-spacing: .12em; text-transform: uppercase; font-size: 13px; font-weight: 500; }
+.display {
+  width: 100%; min-height: 150px; display: flex; align-items: center; justify-content: center;
+  font-family: var(--display); font-weight: 700; font-size: clamp(30px, 6vw, 56px); line-height: 1.15;
+  overflow-wrap: anywhere; text-wrap: balance; padding: 8px 4px;
+}
+.display.idle { color: var(--muted); font-weight: 500; font-size: clamp(22px, 4vw, 32px); }
+.display.spin { color: var(--text); }
+.display.win { color: var(--gold); animation: pop .5s ease-out; }
+@keyframes pop { from { transform: scale(.85); opacity: .3; } to { transform: scale(1); opacity: 1; } }
+fieldset.modes { border: 0; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+fieldset.modes legend { font-size: 14px; color: var(--muted); padding: 0; margin-bottom: 8px; }
+.opt input[type=radio] { width: 18px; height: 18px; accent-color: var(--gold); }
+.display.batch { min-height: 0; padding: 4px 0; font-size: inherit; }
+ol.wingrid { list-style: none; margin: 0; padding: 0; width: 100%; display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; text-align: left; }
+ol.wingrid li { display: flex; align-items: baseline; gap: 10px; padding: 12px 14px; border: 1px solid var(--teal); border-radius: 10px; background: rgba(15,110,115,.07); font: 700 18px/1.25 var(--display); color: var(--teal); overflow-wrap: anywhere; }
+ol.wingrid li b { font-variant-numeric: tabular-nums; color: var(--muted); font-weight: 500; font-size: 15px; min-width: 20px; }
+.btn {
+  font: 700 17px var(--body); border: 0; border-radius: 999px; padding: 14px 34px; cursor: pointer;
+  background: var(--gold); color: var(--gold-ink);
+}
+.btn:hover:not(:disabled) { filter: brightness(1.08); }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.btn.ghost { background: #fff; color: var(--text); border: 1px solid var(--line); font-size: 14px; padding: 8px 16px; font-weight: 500; }
+.btn.ghost:hover:not(:disabled) { border-color: var(--gold); filter: none; }
+.msg { min-height: 20px; font-size: 14px; color: var(--muted); margin: 0; }
+.msg.err { color: #b3361b; }
+.hist-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+ol.hist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+ol.hist li { display: flex; align-items: baseline; gap: 12px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--field); }
+ol.hist .n { font-family: var(--display); color: var(--gold); font-weight: 700; min-width: 28px; font-variant-numeric: tabular-nums; }
+ol.hist .who { flex: 1; font-weight: 500; overflow-wrap: anywhere; }
+ol.hist .t { color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+.empty { color: var(--muted); font-size: 14px; margin: 0; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; }
+canvas#fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
+@media (prefers-reduced-motion: reduce) { .display.win { animation: none; } }
+header { gap: 14px; }
+.topline { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.topline img { height: 38px; width: auto; display: block; }
+.hero { width: 100%; max-height: 300px; object-fit: cover; object-position: center 30%; border-radius: 12px; display: block; }
+.info { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 0; padding: 0; list-style: none; }
+.info li { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; font-size: 14px; display: flex; flex-direction: column; gap: 2px; }
+.info li b { font-family: var(--display); font-size: 16px; color: var(--teal); }
+.info li span { color: var(--muted); }
+.info li.hot { border-color: var(--gold); }
+.info li.hot b { color: var(--gold); }
+</style>
+</head>
+<body>
+<canvas id="fx" aria-hidden="true"></canvas>
+<div class="wrap">
+  <header>
+    <div class="topline">
+      <img src="logo-acson.png" alt="ACSON">
+      <span class="kicker">Quiz réservé aux membres</span>
+    </div>
+    <h1>50 ans aux côtés des enfants</h1>
+    <p class="sub">SOS Villages d'Enfants Sénégal · Gala de charité du cinquantenaire</p>
+    <img class="hero" src="enfants.jpg" alt="Enfants souriants de SOS Villages d'Enfants Sénégal">
+    <ul class="info">
+      <li class="hot"><b>8 billets à gagner</b><span>100 000 FCFA chacun, offerts par l'ACSON</span></li>
+      <li class="hot"><b>1 billet max par personne</b><span>Les doublons sont ignorés dans la liste</span></li>
+      <li><b>Vendredi 27 novembre 2026 · 19 h</b><span>King Fahd Palace, Dakar</span></li>
+      <li><b>Youssou Ndour &amp; le Super Étoile</b><span>Guest star : Viviane</span></li>
+    </ul>
+  </header>
+
+  <div class="grid">
+    <section class="panel" aria-labelledby="h-list">
+      <h2 id="h-list">Participants</h2>
+      <label class="field" for="list">Un nom par ligne. Les noms ci-dessous sont des exemples à remplacer.</label>
+      <textarea id="list" spellcheck="false">Awa Diop
+Mamadou Ndiaye
+Fatou Sow
+Cheikh Fall
+Aminata Ba
+Ibrahima Sarr
+Khady Gueye
+Moussa Diallo
+Ndeye Seck
+Ousmane Thiam
+Mariama Sy
+Abdoulaye Faye</textarea>
+      <label class="opt" for="dedupe"><input type="checkbox" id="dedupe" checked> Ignorer les doublons</label>
+      <h2>Billets</h2>
+      <div class="opt"><label for="billets">Nombre de billets à gagner</label><input type="number" id="billets" min="1" max="99" value="8"></div>
+      <fieldset class="modes">
+        <legend>Mode de tirage</legend>
+        <label class="opt" for="mode-one"><input type="radio" name="mode" id="mode-one" value="one" checked> Un à un, chaque gagnant sort de la liste</label>
+        <label class="opt" for="mode-all"><input type="radio" name="mode" id="mode-all" value="all"> Tous les billets en même temps</label>
+      </fieldset>
+      <p class="count" id="count" aria-live="polite"></p>
+      <p class="count" id="remain" aria-live="polite"></p>
+    </section>
+
+    <div class="stage-col">
+      <section class="stage" aria-labelledby="h-stage">
+        <span class="prize" id="h-stage">8 billets · Gala du cinquantenaire</span>
+        <div class="display idle" id="display" aria-live="polite">Prêt pour le tirage</div>
+        <button class="btn" id="draw" type="button">Lancer le tirage</button>
+        <p class="msg" id="msg"></p>
+      </section>
+
+      <section class="panel" aria-labelledby="h-hist">
+        <div class="hist-head">
+          <h2 id="h-hist">Gagnants</h2>
+          <div class="row">
+            <button class="btn ghost" id="copy" type="button">Copier</button>
+            <button class="btn ghost" id="reset" type="button">Effacer l'historique</button>
+          </div>
+        </div>
+        <ol class="hist" id="hist"></ol>
+        <p class="empty" id="histEmpty">Aucun tirage pour l'instant.</p>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var listEl = $("list"), dedupeEl = $("dedupe"), billetsEl = $("billets"), prizeEl = $("h-stage"), remainEl = $("remain");
+  function billets() { var n = parseInt(billetsEl.value, 10); return n > 0 ? Math.min(n, 99) : 1; }
+  function remaining() { return Math.max(0, billets() - winners.length); }
+  function mode() { return document.getElementById("mode-all").checked ? "all" : "one"; }
+  var displayEl = $("display"), drawBtn = $("draw"), msgEl = $("msg");
+  var countEl = $("count"), histEl = $("hist"), histEmpty = $("histEmpty");
+  var winners = []; // { name, time }
+  var busy = false;
+  var reduceMotion = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function norm(s) { return s.trim().replace(/\s+/g, " ").toLowerCase(); }
+
+  function parse() {
+    var seen = {}, out = [];
+    listEl.value.split(/\r?\n/).forEach(function (l) {
+      var name = l.trim().replace(/\s+/g, " ");
+      if (!name) return;
+      if (dedupeEl.checked) {
+        var k = norm(name);
+        if (seen[k]) return;
+        seen[k] = 1;
+      }
+      out.push(name);
+    });
+    return out;
+  }
+
+  function eligible() {
+    var all = parse();
+    var won = {};
+    winners.forEach(function (w) { won[norm(w.name)] = 1; });
+    return { all: all, pool: all.filter(function (n) { return !won[norm(n)]; }) };
+  }
+
+  // Tirage uniforme sans biais (rejet) avec le générateur cryptographique du navigateur.
+  function randInt(max) {
+    var buf = new Uint32Array(1);
+    var limit = Math.floor(4294967296 / max) * max;
+    do { crypto.getRandomValues(buf); } while (buf[0] >= limit);
+    return buf[0] % max;
+  }
+
+  function setMsg(t, err) { msgEl.textContent = t || ""; msgEl.className = "msg" + (err ? " err" : ""); }
+
+  function refresh() {
+    var e = eligible();
+    countEl.innerHTML = "<b>" + e.pool.length + "</b> participant" + (e.pool.length > 1 ? "s" : "") + " dans le tirage" +
+      (e.all.length !== e.pool.length ? " sur " + e.all.length : "");
+    var rem = remaining(), t = billets();
+    prizeEl.textContent = t + " billet" + (t > 1 ? "s" : "") + " · Gala du cinquantenaire";
+    remainEl.innerHTML = "<b>" + rem + "</b> billet" + (rem > 1 ? "s" : "") + " restant" + (rem > 1 ? "s" : "") + " sur " + t;
+    if (!busy) {
+      drawBtn.textContent = mode() === "all" && rem > 1 ? "Tirer les " + rem + " gagnants" : (rem > 1 || winners.length ? "Tirer le prochain gagnant" : "Tirer le gagnant");
+    }
+    drawBtn.disabled = busy || e.pool.length === 0 || rem === 0;
+    renderHist();
+    try { localStorage.setItem("tirage-gala", JSON.stringify({ list: listEl.value, winners: winners, billets: t, mode: mode() })); } catch (x) {}
+  }
+
+  function renderHist() {
+    histEl.innerHTML = "";
+    winners.forEach(function (w, i) {
+      var li = document.createElement("li");
+      var n = document.createElement("span"); n.className = "n"; n.textContent = String(i + 1);
+      var who = document.createElement("span"); who.className = "who"; who.textContent = w.name;
+      var t = document.createElement("span"); t.className = "t"; t.textContent = w.time;
+      li.appendChild(n); li.appendChild(who); li.appendChild(t);
+      histEl.appendChild(li);
+    });
+    histEmpty.style.display = winners.length ? "none" : "block";
+  }
+
+  function draw() {
+    if (busy) return;
+    var pool = eligible().pool, rem = remaining();
+    if (rem === 0) { setMsg("Tous les billets sont attribués.", true); return; }
+    if (!pool.length) { setMsg("Aucun participant disponible. Ajoutez des noms dans la liste.", true); return; }
+    busy = true; drawBtn.disabled = true; setMsg("");
+    var n = mode() === "all" ? Math.min(rem, pool.length) : 1;
+    // Résultat fixé avant l'animation : n gagnants distincts, tirés sans remise.
+    var copy = pool.slice(), picked = [];
+    for (var k = 0; k < n; k++) picked.push(copy.splice(randInt(copy.length), 1)[0]);
+    displayEl.className = "display spin";
+
+    function finish() {
+      var first = winners.length;
+      if (n === 1) {
+        displayEl.className = "display win";
+        displayEl.textContent = picked[0];
+      } else {
+        displayEl.className = "display batch win";
+        displayEl.textContent = "";
+        var ol = document.createElement("ol"); ol.className = "wingrid";
+        picked.forEach(function (nm, i) {
+          var li = document.createElement("li");
+          var b = document.createElement("b"); b.textContent = String(first + i + 1);
+          var s = document.createElement("span"); s.textContent = nm;
+          li.appendChild(b); li.appendChild(s); ol.appendChild(li);
+        });
+        displayEl.appendChild(ol);
+      }
+      var now = new Date();
+      var hh = String(now.getHours()).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0");
+      picked.forEach(function (nm) { winners.push({ name: nm, time: hh }); });
+      busy = false;
+      refresh();
+      var left = remaining();
+      if (left === 0) setMsg("Félicitations ! Tous les billets sont attribués.");
+      else if (mode() === "all" && n < rem) setMsg("Seulement " + n + " participants disponibles : il reste " + left + " billet" + (left > 1 ? "s" : "") + " à attribuer.", true);
+      else setMsg("Félicitations ! Il reste " + left + " billet" + (left > 1 ? "s" : "") + ".");
+      if (!reduceMotion) confetti();
+    }
+
+    if (reduceMotion || pool.length === 1) { finish(); return; }
+
+    var steps = 28, i = 0;
+    (function tick() {
+      if (i >= steps) { finish(); return; }
+      displayEl.textContent = n === 1 || pool.length === 1 ? pool[randInt(pool.length)] : "Tirage de " + n + " gagnants… " + pool[randInt(pool.length)];
+      i++;
+      setTimeout(tick, 60 + Math.pow(i / steps, 3) * 380);
+    })();
+  }
+
+  // Confettis dorés
+  var cv = $("fx"), ctx = cv.getContext("2d"), parts = [], raf = 0;
+  function sizeCv() { cv.width = innerWidth; cv.height = innerHeight; }
+  addEventListener("resize", sizeCv); sizeCv();
+  function confetti() {
+    var colors = ["#f26522", "#0f6e73", "#f7a35c", "#5fb3b3"];
+    for (var k = 0; k < 140; k++) {
+      parts.push({
+        x: cv.width / 2 + (Math.random() - .5) * 200, y: cv.height * .35,
+        vx: (Math.random() - .5) * 12, vy: -Math.random() * 11 - 3,
+        s: 5 + Math.random() * 6, r: Math.random() * 6, vr: (Math.random() - .5) * .4,
+        c: colors[k % colors.length], life: 0
+      });
+    }
+    if (!raf) loop();
+  }
+  function loop() {
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    parts = parts.filter(function (p) { return p.y < cv.height + 20 && p.life < 220; });
+    parts.forEach(function (p) {
+      p.life++; p.vy += .28; p.vx *= .99; p.x += p.vx; p.y += p.vy; p.r += p.vr;
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r);
+      ctx.fillStyle = p.c; ctx.fillRect(-p.s / 2, -p.s / 4, p.s, p.s / 2); ctx.restore();
+    });
+    raf = parts.length ? requestAnimationFrame(loop) : 0;
+    if (!parts.length) ctx.clearRect(0, 0, cv.width, cv.height);
+  }
+
+  drawBtn.addEventListener("click", draw);
+  listEl.addEventListener("input", refresh);
+  dedupeEl.addEventListener("change", refresh);
+  billetsEl.addEventListener("input", refresh);
+  document.getElementById("mode-one").addEventListener("change", refresh);
+  document.getElementById("mode-all").addEventListener("change", refresh);
+
+  $("reset").addEventListener("click", function () {
+    if (busy) return;
+    winners = [];
+    displayEl.className = "display idle"; displayEl.textContent = "Prêt pour le tirage";
+    setMsg(""); refresh();
+  });
+
+  $("copy").addEventListener("click", function () {
+    if (!winners.length) { setMsg("Rien à copier pour l'instant.", true); return; }
+    var txt = winners.map(function (w, i) { return (i + 1) + ". " + w.name + " (" + w.time + ")"; }).join("\n");
+    try {
+      navigator.clipboard.writeText(txt).then(function () { setMsg("Liste des gagnants copiée."); },
+        function () { setMsg("Copie refusée par le navigateur.", true); });
+    } catch (x) { setMsg("Copie refusée par le navigateur.", true); }
+  });
+
+  try {
+    var saved = JSON.parse(localStorage.getItem("tirage-gala") || "null");
+    if (saved && typeof saved.list === "string") {
+      listEl.value = saved.list;
+      if (Array.isArray(saved.winners)) winners = saved.winners;
+      if (saved.billets > 0) billetsEl.value = saved.billets;
+      if (saved.mode === "all") document.getElementById("mode-all").checked = true;
+    }
+  } catch (x) {}
+  refresh();
+})();
+</script>
+</body>
+</html>
